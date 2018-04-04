@@ -1,21 +1,16 @@
-import Vue from "vue";
-import HelloComponent from "./components/Hello.vue";
-import HelloDecoratorComponent from "./components/HelloDecorator.vue";
+import Vue from 'vue';
+import MineField from './components/MineField.vue';
 
-let v = new Vue({
-    el: "#app",
+const v = new Vue({
+    el: '#app',
     template: `
     <div>
-        Name: <input v-model="name" type="text">
-        <h1>Hello Component</h1>
-        <hello-component :name="name" :initialEnthusiasm="5" />
-        <h1>Hello Decorator Component</h1>
-        <hello-decorator-component :name="name" :initialEnthusiasm="5" />
-        </div>
+        <h2>A Mines with Typescript and Vue</h2>
+        <MineField></MineField>
+    </div>
     `,
-    data: { name: "World" },
+
     components: {
-        HelloComponent,
-        HelloDecoratorComponent
-    }
+        MineField,
+    },
 });

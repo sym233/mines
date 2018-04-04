@@ -1,6 +1,7 @@
 
 var path = require('path')
 var webpack = require('webpack')
+var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: './src/index.ts',
@@ -55,7 +56,10 @@ module.exports = {
   performance: {
     hints: false
   },
-  devtool: '#eval-source-map'
+  devtool: 'source-map',
+  externals: {
+	  vue: 'Vue',
+  },
 }
 
 if (process.env.NODE_ENV === 'production') {
