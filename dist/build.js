@@ -464,6 +464,7 @@ let miningBeginingTime;
             blocksOpened: 0,
             selectLevel: '1',
             miningTime: 0,
+            flagNumber: 0,
         };
     },
     methods: {
@@ -492,6 +493,9 @@ let miningBeginingTime;
             this.openState = createOpenState(this.mineFieldHeight, this.mineFieldWidth);
             this.firstOpenBlock = true;
             this.blocksOpened = 0;
+            this.flagNumber = 0;
+            window.clearInterval(miningTimer);
+            this.miningTime = 0;
             this.$nextTick(() => {
                 this.showMineField = true;
             });
@@ -508,7 +512,9 @@ let miningBeginingTime;
             if (this.firstOpenBlock) {
                 adjustMineField(this.mineMap, height, width);
                 miningBeginingTime = Date.now();
-                miningTimer = window.setInterval(() => (this.miningTime = (Date.now() - miningBeginingTime) / 1000), 100);
+                miningTimer = window.setInterval(() => {
+                    this.miningTime = (Date.now() - miningBeginingTime) / 1000;
+                }, 1000);
                 this.firstOpenBlock = false;
             }
             if (this.openState[height][width] === _MineBlock_vue__WEBPACK_IMPORTED_MODULE_1__["OpenState"].Opened) {
@@ -525,10 +531,15 @@ let miningBeginingTime;
             }
             if (this.openState[height][width] === _MineBlock_vue__WEBPACK_IMPORTED_MODULE_1__["OpenState"].Unopened) {
                 vue__WEBPACK_IMPORTED_MODULE_0___default.a.set(this.openState[height], width, _MineBlock_vue__WEBPACK_IMPORTED_MODULE_1__["OpenState"].Flagged);
+                this.flagNumber++;
             }
             else if (this.openState[height][width] === _MineBlock_vue__WEBPACK_IMPORTED_MODULE_1__["OpenState"].Flagged) {
                 vue__WEBPACK_IMPORTED_MODULE_0___default.a.set(this.openState[height], width, _MineBlock_vue__WEBPACK_IMPORTED_MODULE_1__["OpenState"].Unopened);
+                this.flagNumber--;
             }
+        },
+        formattedMiningTime() {
+            return Math.round(this.miningTime);
         },
     },
     computed: {
@@ -548,6 +559,9 @@ let miningBeginingTime;
                 endGameShow(this.mineMap, this.openState);
                 return -1;
             }
+        },
+        minesRemaining() {
+            return this.mineNumber - this.flagNumber;
         },
     },
     components: {
@@ -728,13 +742,15 @@ var render = function() {
       _vm._v(
         _vm._s(
           _vm.playState === 0
-            ? "用时：" + _vm.miningTime.toFixed(1)
+            ? "用时：" + _vm.formattedMiningTime()
             : _vm.playState === 1
-              ? "胜利：共计用时" + _vm.miningTime.toFixed(1)
+              ? "胜利：共计用时" + _vm.formattedMiningTime()
               : "失败"
         )
       )
     ]),
+    _vm._v(" "),
+    _c("p", [_vm._v("剩余雷数：" + _vm._s(_vm.minesRemaining))]),
     _vm._v(" "),
     _c(
       "select",

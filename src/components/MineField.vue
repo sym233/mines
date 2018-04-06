@@ -18,11 +18,12 @@
     </table>
     <!-- <p>blocks opened: {{blocksOpened}}</p> -->
     <p>{{playState === 0?
-      `用时：${miningTime.toFixed(1)}`:
+      `用时：${formattedMiningTime()}`:
       playState === 1?
-        `胜利：共计用时${miningTime.toFixed(1)}`:
+        `胜利：共计用时${formattedMiningTime()}`:
         '失败'
     }}</p>
+    <p>剩余雷数：{{minesRemaining}}</p>
     <select v-model="selectLevel">
       <option value="0" disabled>请选择难度</option>
       <option value="1">简单：9*9的雷区，10个雷</option>
@@ -37,7 +38,6 @@
 import Vue from 'vue';
 import MineBlock, { OpenState } from './MineBlock.vue';
 
-import { select } from '../../../express/node_modules/@types/async';
 import { assert } from '../utl';
 
 type MineMap = number[][];
@@ -318,6 +318,7 @@ interface Data {
   blocksOpened: number;
   selectLevel: string;
   miningTime: number;
+  flagNumber: number;
 }
 
 export default Vue.extend({
@@ -333,6 +334,7 @@ export default Vue.extend({
       blocksOpened: 0,
       selectLevel: '1',
       miningTime: 0,
+      flagNumber: 0,
     };
   },
   methods: {
@@ -369,6 +371,10 @@ export default Vue.extend({
       );
       this.firstOpenBlock = true;
       this.blocksOpened = 0;
+      this.flagNumber = 0;
+
+      window.clearInterval(miningTimer);
+      this.miningTime = 0;
       this.$nextTick(() => {
         this.showMineField = true;
       });
@@ -388,10 +394,9 @@ export default Vue.extend({
       if (this.firstOpenBlock) {
         adjustMineField(this.mineMap, height, width);
         miningBeginingTime = Date.now();
-        miningTimer = window.setInterval(
-          () => (this.miningTime = (Date.now() - miningBeginingTime) / 1000),
-          100,
-        );
+        miningTimer = window.setInterval(() => {
+          this.miningTime = (Date.now() - miningBeginingTime) / 1000;
+        }, 1000);
         this.firstOpenBlock = false;
       }
 
@@ -420,9 +425,15 @@ export default Vue.extend({
 
       if (this.openState[height][width] === OpenState.Unopened) {
         Vue.set(this.openState[height], width, OpenState.Flagged);
+        this.flagNumber++;
       } else if (this.openState[height][width] === OpenState.Flagged) {
         Vue.set(this.openState[height], width, OpenState.Unopened);
+        this.flagNumber--;
       }
+    },
+
+    formattedMiningTime(): string | number {
+      return Math.round(this.miningTime);
     },
   },
   computed: {
@@ -442,6 +453,9 @@ export default Vue.extend({
         endGameShow(this.mineMap, this.openState);
         return -1;
       }
+    },
+    minesRemaining(): number {
+      return this.mineNumber - this.flagNumber;
     },
   },
   components: {
